@@ -79,7 +79,7 @@ TODA_ESPANA = "Toda España"
 AMBITOS = {"ESTATAL": "Estatal", "ESTADO": "Estatal", "AUTONOMICA": "Autonómica", "LOCAL": "Local", "OTROS": "Otros organismos"}
 
 # Palabras que se mantienen en minúscula al capitalizar nombres de órganos.
-MINUSCULAS = {"de", "del", "la", "las", "los", "el", "y", "e", "i", "o", "u", "a", "en", "para", "por", "con", "d'", "l'", "da", "do", "das", "dos", "na", "no", "eta"}
+MINUSCULAS = {"de", "del", "la", "las", "los", "el", "y", "e", "i", "u", "en", "para", "por", "con", "da", "do", "das", "dos", "na", "no", "eta"}
 # Siglas y nombres que se mantienen tal cual.
 INVARIABLES = {"IRPF", "IVA", "PIE", "FP", "ESO", "UE", "FEDER", "FSE", "MRR", "EBAU", "PAU", "ONG", "ONGD", "IMV", "PIB", "I+D", "I+D+I", "TIC", "DNI", "NIE", "UNED", "RTVE", "SEPE", "INEM", "SAS", "IES", "CEIP", "AMPA", "CIF", "NIF", "UPV", "UPC", "UAB", "UB", "UV", "UA", "UJI", "UMH", "UCM", "UAM", "UPM", "URJC", "UC3M", "UGR", "US", "UMA", "UCA", "UCO", "UJA", "UHU", "UAL", "UPO", "USC", "UDC", "UVIGO", "ULL", "ULPGC", "UZ", "UIB", "UM", "UCLM", "UEX", "UNIZAR", "UPNA", "EHU", "UPV/EHU", "URV", "UDG", "UDL", "UOC", "UVA", "USAL", "UBU", "ULE", "UNIOVI", "UNICAN", "UNIRIOJA", "UNAV", "UMU", "UPCT", "UNIA", "UIMP", "CSIC", "ICO", "IDAE", "ICEX", "CDTI", "ENISA", "INJUVE", "IMSERSO", "INSS", "TGSS", "AEAT", "DGT", "BOE", "BOP", "DOGC", "DOGV", "DOG", "BOJA", "BOCM", "BOCYL", "DOCM", "DOE", "BON", "BOR", "BOA", "BOPV", "BOC", "BOIB", "BORM", "BOPA", "BOCCE", "BOME", "UGT", "CCOO", "SMI", "IPREM", "RGI", "PNC", "SAD", "SAAD"}
 
@@ -95,6 +95,9 @@ def capitalizar(texto: str) -> str:
             palabras.append(palabra)
         elif i > 0 and palabra.lower() in MINUSCULAS:
             palabras.append(palabra.lower())
+        elif len(palabra) > 2 and palabra[1] == "'" and palabra[0] in "DL":
+            # Catalán: D'IGUALTAT -> d'Igualtat
+            palabras.append(palabra[0].lower() + "'" + palabra[2:3].upper() + palabra[3:].lower())
         else:
             palabras.append("-".join(parte[:1].upper() + parte[1:].lower() for parte in palabra.split("-")))
     return " ".join(palabras)
