@@ -76,7 +76,44 @@ COMUNIDADES = {
 }
 TODA_ESPANA = "Toda España"
 
-AMBITOS = {"ESTATAL": "Estatal", "AUTONOMICA": "Autonómica", "LOCAL": "Local"}
+AMBITOS = {"ESTATAL": "Estatal", "ESTADO": "Estatal", "AUTONOMICA": "Autonómica", "LOCAL": "Local", "OTROS": "Otros organismos"}
+
+# Palabras que se mantienen en minúscula al capitalizar nombres de órganos.
+MINUSCULAS = {"de", "del", "la", "las", "los", "el", "y", "e", "i", "o", "u", "a", "en", "para", "por", "con", "d'", "l'", "da", "do", "das", "dos", "na", "no", "eta"}
+# Siglas y nombres que se mantienen tal cual.
+INVARIABLES = {"IRPF", "IVA", "PIE", "FP", "ESO", "UE", "FEDER", "FSE", "MRR", "EBAU", "PAU", "ONG", "ONGD", "IMV", "PIB", "I+D", "I+D+I", "TIC", "DNI", "NIE", "UNED", "RTVE", "SEPE", "INEM", "SAS", "IES", "CEIP", "AMPA", "CIF", "NIF", "UPV", "UPC", "UAB", "UB", "UV", "UA", "UJI", "UMH", "UCM", "UAM", "UPM", "URJC", "UC3M", "UGR", "US", "UMA", "UCA", "UCO", "UJA", "UHU", "UAL", "UPO", "USC", "UDC", "UVIGO", "ULL", "ULPGC", "UZ", "UIB", "UM", "UCLM", "UEX", "UNIZAR", "UPNA", "EHU", "UPV/EHU", "URV", "UDG", "UDL", "UOC", "UVA", "USAL", "UBU", "ULE", "UNIOVI", "UNICAN", "UNIRIOJA", "UNAV", "UMU", "UPCT", "UNIA", "UIMP", "CSIC", "ICO", "IDAE", "ICEX", "CDTI", "ENISA", "INJUVE", "IMSERSO", "INSS", "TGSS", "AEAT", "DGT", "BOE", "BOP", "DOGC", "DOGV", "DOG", "BOJA", "BOCM", "BOCYL", "DOCM", "DOE", "BON", "BOR", "BOA", "BOPV", "BOC", "BOIB", "BORM", "BOPA", "BOCCE", "BOME", "UGT", "CCOO", "SMI", "IPREM", "RGI", "PNC", "SAD", "SAAD"}
+
+
+def capitalizar(texto: str) -> str:
+    """Convierte 'AYUNTAMIENTO DE XOVE' en 'Ayuntamiento de Xove'. Respeta siglas conocidas y textos ya mezclados."""
+    if not texto or not texto.isupper():
+        return texto
+    palabras = []
+    for i, palabra in enumerate(texto.split()):
+        limpia = palabra.strip("(),.;:")
+        if limpia in INVARIABLES or (len(limpia) <= 3 and limpia.isalpha() and i > 0 and limpia.lower() not in MINUSCULAS):
+            palabras.append(palabra)
+        elif i > 0 and palabra.lower() in MINUSCULAS:
+            palabras.append(palabra.lower())
+        else:
+            palabras.append("-".join(parte[:1].upper() + parte[1:].lower() for parte in palabra.split("-")))
+    return " ".join(palabras)
+
+
+def titulo_legible(texto: str) -> str:
+    """Los títulos escritos todo en mayúsculas pasan a tipo frase, conservando siglas conocidas."""
+    if not texto or not texto.isupper():
+        return texto
+    palabras = []
+    for i, palabra in enumerate(texto.split()):
+        limpia = palabra.strip("(),.;:")
+        if limpia in INVARIABLES or (len(limpia) <= 3 and limpia.isalpha() and i > 0 and limpia.lower() not in MINUSCULAS):
+            palabras.append(palabra)
+        elif i == 0:
+            palabras.append(palabra[:1].upper() + palabra[1:].lower())
+        else:
+            palabras.append(palabra.lower())
+    return " ".join(palabras)
 
 
 class ApiError(RuntimeError):
@@ -235,8 +272,8 @@ def organo_texto(detalle: dict) -> str:
     nivel2 = (organo.get("nivel2") or "").strip()
     nivel3 = (organo.get("nivel3") or "").strip()
     if nivel2 and nivel3 and nivel2 != nivel3 and nivel2 not in nivel3:
-        return f"{nivel3} ({nivel2})"
-    return nivel3 or nivel2
+        return f"{capitalizar(nivel3)} ({capitalizar(nivel2)})"
+    return capitalizar(nivel3 or nivel2)
 
 
 def normalizar(detalle: dict) -> dict:
@@ -246,13 +283,12 @@ def normalizar(detalle: dict) -> dict:
     regiones = descripciones(detalle.get("regiones"))
     return {
         "id": num,
-        "titulo": " ".join((detalle.get("descripcion") or "").split()),
+        "titulo": titulo_legible(" ".join((detalle.get("descripcion") or "").split())),
         "organo": organo_texto(detalle),
         "ambito": AMBITOS.get((organo.get("nivel1") or "").upper(), organo.get("nivel1") or ""),
         "comunidades": comunidades_de(regiones),
-        "regiones": [separar_region(r)[1] or r for r in regiones],
+        "regiones": [capitalizar(separar_region(r)[1] or r) for r in regiones],
         "finalidad": (detalle.get("descripcionFinalidad") or "").strip() or None,
-        "instrumentos": [i.strip() for i in descripciones(detalle.get("instrumentos")) if i.strip()],
         "tipoConvocatoria": detalle.get("tipoConvocatoria"),
         "presupuesto": detalle.get("presupuestoTotal"),
         "fechaPublicacion": fecha_iso(detalle.get("fechaRecepcion")),
@@ -316,7 +352,8 @@ def actualizar(dias: int) -> None:
     vigentes.sort(key=lambda c: (c.get("fechaPublicacion") or "", c["id"]), reverse=True)
 
     RUTA_SALIDA.parent.mkdir(parents=True, exist_ok=True)
-    RUTA_SALIDA.write_text(json.dumps(vigentes, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    # Un objeto por línea: diffs legibles en git y fichero compacto para el navegador.
+    RUTA_SALIDA.write_text("[\n" + ",\n".join(json.dumps(c, ensure_ascii=False) for c in vigentes) + "\n]\n", encoding="utf-8")
     RUTA_META.write_text(
         json.dumps(
             {
