@@ -157,3 +157,11 @@ body {
   text-align: center;
   color: var(--texto-suave);
 }
+
+.grupo {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-suave);
+  margin: 12px 0 0;
+}

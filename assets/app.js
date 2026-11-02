@@ -7,6 +7,7 @@
   const RUTA_DATOS = "data/convocatorias.json";
   const RUTA_META = "data/meta.json";
   const DIAS_URGENTE = 7;
+  const DIAS_CIERRAN_PRONTO = 14;
 
   const $ = (sel) => document.querySelector(sel);
   const form = $("#filtros");
@@ -31,8 +32,11 @@
   function textoPlazo(ayuda) {
     const dias = diasHasta(ayuda.plazoFin);
     if (dias === null) {
-      if (ayuda.abierto === false) return { texto: "Plazo cerrado", clase: "cerrado" };
-      return { texto: ayuda.plazoTexto ? "Plazo: " + ayuda.plazoTexto : "Plazo sin fecha de fin publicada", clase: "sin-fecha" };
+      if (ayuda.plazoTexto) {
+        const t = ayuda.plazoTexto.length > 90 ? ayuda.plazoTexto.slice(0, 87) + "..." : ayuda.plazoTexto;
+        return { texto: "Plazo: " + t, clase: "sin-fecha" };
+      }
+      return { texto: "Plazo no publicado todavía", clase: "sin-fecha" };
     }
     if (dias < 0) return { texto: "Plazo cerrado el " + formatearFecha(ayuda.plazoFin), clase: "cerrado" };
     if (dias === 0) return { texto: "Último día para solicitar", clase: "urgente" };
@@ -48,8 +52,13 @@
 
   function estaAbierta(ayuda) {
     const dias = diasHasta(ayuda.plazoFin);
-    if (dias === null) return ayuda.abierto !== false;
+    if (dias === null) return true; // sin fecha publicada: se da por posible
     return dias >= 0;
+  }
+
+  function cierraPronto(ayuda) {
+    const dias = diasHasta(ayuda.plazoFin);
+    return dias !== null && dias >= 0 && dias <= DIAS_CIERRAN_PRONTO;
   }
 
   function normalizar(texto) {
@@ -71,7 +80,7 @@
     const ambitos = new Set();
     const finalidades = new Set();
     for (const a of ayudas) {
-      (a.regiones || []).forEach((r) => regiones.add(r));
+      (a.comunidades || []).forEach((r) => regiones.add(r));
       if (a.ambito) ambitos.add(a.ambito);
       if (a.finalidad) finalidades.add(a.finalidad);
     }
@@ -90,11 +99,11 @@
 
     return ayudas.filter((a) => {
       if (soloAbiertas && !estaAbierta(a)) return false;
-      if (region && !(a.regiones || []).includes(region)) return false;
+      if (region && !(a.comunidades || []).includes(region) && !(a.comunidades || []).includes("Toda España")) return false;
       if (ambito && a.ambito !== ambito) return false;
       if (finalidad && a.finalidad !== finalidad) return false;
       if (texto) {
-        const pajar = normalizar([a.titulo, a.organo, a.finalidad, (a.beneficiarios || []).join(" ")].join(" "));
+        const pajar = normalizar([a.titulo, a.organo, a.finalidad, (a.regiones || []).join(" "), (a.comunidades || []).join(" ")].join(" "));
         if (!texto.split(/\s+/).every((palabra) => pajar.includes(palabra))) return false;
       }
       return true;
@@ -113,7 +122,29 @@
       return;
     }
     const frag = document.createDocumentFragment();
-    for (const a of lista) {
+    const pronto = lista.filter(cierraPronto);
+    const resto = lista.filter((a) => !cierraPronto(a));
+    pronto.sort((x, y) => (x.plazoFin || "").localeCompare(y.plazoFin || ""));
+    if (pronto.length) {
+      frag.appendChild(encabezadoGrupo("Cierran pronto", pronto.length));
+      for (const a of pronto) frag.appendChild(tarjeta(a));
+    }
+    if (resto.length) {
+      if (pronto.length) frag.appendChild(encabezadoGrupo("Publicadas recientemente", resto.length));
+      for (const a of resto) frag.appendChild(tarjeta(a));
+    }
+    contenedor.appendChild(frag);
+  }
+
+  function encabezadoGrupo(titulo, n) {
+    const h = document.createElement("h2");
+    h.className = "grupo";
+    h.textContent = titulo + " (" + n + ")";
+    return h;
+  }
+
+  function tarjeta(a) {
+    {
       const nodo = plantilla.content.cloneNode(true);
       const plazo = textoPlazo(a);
       const pPlazo = nodo.querySelector(".plazo");
@@ -127,7 +158,7 @@
       nodo.querySelector(".organo").textContent = a.organo || "";
 
       const ul = nodo.querySelector(".etiquetas");
-      const etiquetas = [].concat(a.regiones || [], a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
+      const etiquetas = [].concat(a.comunidades || [], a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
       for (const e of etiquetas.slice(0, 5)) {
         const li = document.createElement("li");
         li.textContent = e;
@@ -140,9 +171,8 @@
       const bases = nodo.querySelector(".enlace-bases");
       if (a.urlBases) { bases.href = a.urlBases; bases.hidden = false; }
 
-      frag.appendChild(nodo);
+      return nodo;
     }
-    contenedor.appendChild(frag);
   }
 
   function actualizar() {

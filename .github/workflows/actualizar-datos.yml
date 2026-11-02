@@ -9,7 +9,7 @@ on:
       dias:
         description: "Días hacia atrás que se consultan"
         required: false
-        default: "45"
+        default: "10"
 
 permissions:
   contents: write
@@ -29,7 +29,7 @@ jobs:
           python-version: "3.12"
 
       - name: Descargar y generar datos
-        run: python scripts/actualizar_bdns.py --dias "${{ github.event.inputs.dias || '45' }}"
+        run: python scripts/actualizar_bdns.py --dias "${{ github.event.inputs.dias || '10' }}"
 
       - name: Publicar cambios si los hay
         run: |

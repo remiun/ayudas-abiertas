@@ -21,7 +21,7 @@ No hay servidor propio, ni base de datos, ni coste de operación.
 
 ## Fuente de datos
 
-Los datos proceden del [Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas](https://www.infosubvenciones.es/), de acceso público según el artículo 20 de la Ley 38/2003 General de Subvenciones. Más detalle en [`docs/fuentes.md`](docs/fuentes.md).
+Los datos proceden del [Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas](https://www.infosubvenciones.es/), gestionado por la Intervención General de la Administración del Estado, de acceso público según el artículo 20 de la Ley 38/2003 General de Subvenciones. Los datos pueden cambiar después de extraerlos; la ficha oficial manda. Más detalle y condiciones de reutilización en [`docs/fuentes.md`](docs/fuentes.md).
 
 ## Desarrollo
 
@@ -31,8 +31,11 @@ Requisitos: Python 3.12 o superior. El script no usa dependencias externas.
 # Explorar los catálogos de la API (regiones, tipos de beneficiario, finalidades)
 python scripts/actualizar_bdns.py --explorar
 
-# Descargar y generar data/convocatorias.json
+# Incorporar lo publicado en los últimos 10 días a data/convocatorias.json
 python scripts/actualizar_bdns.py
+
+# Primera carga o recuperación: ventana más amplia
+python scripts/actualizar_bdns.py --dias 60
 
 # Servir la web en local
 python -m http.server 8000
