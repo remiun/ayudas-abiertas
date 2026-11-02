@@ -38,11 +38,15 @@ RUTA_RAW = RAIZ / "data" / "raw"
 
 # Catálogos de la API que conviene volcar antes de fijar los filtros.
 CATALOGOS = {
-    "tiposbeneficiario": "/tiposbeneficiario",
     "regiones": "/regiones",
     "finalidades": "/finalidades",
     "instrumentos": "/instrumentos",
-    "tiposadministracion": "/tiposadministracion",
+    # Nombres por confirmar: la API devuelve 404 en /tiposbeneficiario y /tiposadministracion.
+    "beneficiarios": "/beneficiarios",
+    "tiposbeneficiarios": "/tiposbeneficiarios",
+    "organos": "/organos",
+    "sectores": "/sectores",
+    "actividades": "/actividades",
 }
 
 # Palabras que identifican a personas físicas en la descripción del tipo
@@ -60,7 +64,14 @@ def peticion(ruta: str, params: dict | None = None, intentos: int = 3) -> dict |
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:
                 return json.load(resp)
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as exc:
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise RuntimeError(f"La API no tiene {ruta} (404)") from exc
+            ultimo_error = exc
+            print(f"  aviso: fallo {intento}/{intentos} en {ruta}: {exc}", file=sys.stderr)
+            time.sleep(2 * intento)
+            continue
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             ultimo_error = exc
             print(f"  aviso: fallo {intento}/{intentos} en {ruta}: {exc}", file=sys.stderr)
             time.sleep(2 * intento)

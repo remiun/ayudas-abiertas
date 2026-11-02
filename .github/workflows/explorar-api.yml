@@ -18,6 +18,13 @@ jobs:
           python-version: "3.12"
       - name: Volcar catálogos y muestras
         run: python scripts/actualizar_bdns.py --explorar
+      - name: Mostrar volcado en el registro
+        if: always()
+        run: |
+          for f in data/raw/*.json; do
+            echo "=== $f ($(wc -c < "$f") bytes)"
+            python3 -c "import json,sys; d=json.load(open('$f')); print(json.dumps(d, ensure_ascii=False)[:7000])"
+          done
       - name: Guardar volcado como artefacto
         if: always()
         uses: actions/upload-artifact@v4
