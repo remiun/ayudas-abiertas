@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayudas Abiertas</title>
+  <meta name="description" content="Qué ayudas públicas puedes pedir hoy en España, filtradas por tu situación. Gratis, sin cuenta y con datos abiertos de la BDNS.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="saltar" href="#resultados">Saltar a los resultados</a>
+
+  <header class="cabecera">
+    <div class="contenedor">
+      <h1>Ayudas Abiertas</h1>
+      <p class="lema">Qué ayudas públicas puedes pedir hoy en España. Gratis, sin cuenta y sin rastreo.</p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <form class="filtros" id="filtros" aria-label="Filtros de búsqueda">
+      <div class="campo campo-ancho">
+        <label for="texto">Buscar</label>
+        <input type="search" id="texto" name="texto" placeholder="Alquiler, beca, autónomos, dependencia..." autocomplete="off">
+      </div>
+      <div class="campo">
+        <label for="region">Comunidad</label>
+        <select id="region" name="region">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="ambito">Administración</label>
+        <select id="ambito" name="ambito">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="finalidad">Tema</label>
+        <select id="finalidad" name="finalidad">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="campo campo-check">
+        <label><input type="checkbox" id="abiertas" name="abiertas" checked> Solo con plazo abierto</label>
+      </div>
+    </form>
+
+    <p class="estado" id="estado" role="status" aria-live="polite">Cargando ayudas...</p>
+
+    <section id="resultados" class="resultados" aria-label="Ayudas encontradas"></section>
+
+    <template id="plantilla-ayuda">
+      <article class="ayuda">
+        <p class="plazo"></p>
+        <h2 class="titulo"><a target="_blank" rel="noopener"></a></h2>
+        <p class="organo"></p>
+        <ul class="etiquetas"></ul>
+        <p class="enlaces">
+          <a class="enlace-ficha" target="_blank" rel="noopener">Ficha oficial</a>
+          <a class="enlace-sede" target="_blank" rel="noopener" hidden>Dónde se solicita</a>
+          <a class="enlace-bases" target="_blank" rel="noopener" hidden>Bases reguladoras</a>
+        </p>
+      </article>
+    </template>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <p>Datos de la <a href="https://www.infosubvenciones.es/" target="_blank" rel="noopener">Base de Datos Nacional de Subvenciones</a>. <span id="actualizado"></span></p>
+      <p>Esta web orienta, no tramita. Comprueba siempre los requisitos en la convocatoria oficial. <a href="https://github.com/remiun/ayudas-abiertas" target="_blank" rel="noopener">Código abierto</a>, sin cookies ni analítica.</p>
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

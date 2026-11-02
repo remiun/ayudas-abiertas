@@ -1,0 +1,159 @@
+:root {
+  --fondo: #f6f7f4;
+  --superficie: #ffffff;
+  --texto: #1d1f1a;
+  --texto-suave: #58605a;
+  --borde: #d9ddd5;
+  --acento: #1f6f4a;
+  --acento-texto: #ffffff;
+  --aviso: #a3480b;
+  --aviso-fondo: #fff1e4;
+  --urgente: #a31b1b;
+  --urgente-fondo: #fde8e8;
+  --radio: 10px;
+  --max: 960px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #15171a;
+    --superficie: #1f2226;
+    --texto: #eceee9;
+    --texto-suave: #a7ada5;
+    --borde: #33383d;
+    --acento: #5cc08f;
+    --acento-texto: #10261b;
+    --aviso: #f2a35e;
+    --aviso-fondo: #33261a;
+    --urgente: #f28b8b;
+    --urgente-fondo: #3a1f1f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-size: 1rem;
+}
+
+.contenedor {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.saltar {
+  position: absolute;
+  left: -999px;
+  top: 8px;
+  background: var(--acento);
+  color: var(--acento-texto);
+  padding: 8px 12px;
+  border-radius: var(--radio);
+}
+.saltar:focus { left: 16px; z-index: 10; }
+
+.cabecera {
+  background: var(--acento);
+  color: var(--acento-texto);
+  padding: 28px 0 24px;
+}
+.cabecera h1 { margin: 0 0 6px; font-size: 1.8rem; }
+.lema { margin: 0; opacity: 0.92; }
+
+.filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 16px;
+  margin: 20px 0 12px;
+}
+@media (min-width: 640px) {
+  .filtros { grid-template-columns: repeat(3, 1fr); }
+  .campo-ancho { grid-column: 1 / -1; }
+}
+
+.campo { display: flex; flex-direction: column; gap: 4px; }
+.campo label { font-size: 0.9rem; color: var(--texto-suave); }
+.campo input[type="search"],
+.campo select {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 44px;
+}
+.campo-check { justify-content: end; }
+.campo-check label { color: var(--texto); display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.campo-check input { width: 20px; height: 20px; }
+
+.estado { color: var(--texto-suave); margin: 8px 0 16px; }
+
+.resultados { display: grid; gap: 12px; margin-bottom: 32px; }
+
+.ayuda {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 16px;
+}
+.ayuda .titulo { font-size: 1.1rem; margin: 6px 0; line-height: 1.35; }
+.ayuda .titulo a { color: inherit; text-decoration: none; }
+.ayuda .titulo a:hover, .ayuda .titulo a:focus { text-decoration: underline; }
+.organo { margin: 0 0 8px; color: var(--texto-suave); font-size: 0.92rem; }
+
+.plazo {
+  display: inline-block;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--aviso-fondo);
+  color: var(--aviso);
+}
+.plazo.urgente { background: var(--urgente-fondo); color: var(--urgente); }
+.plazo.cerrado { background: var(--borde); color: var(--texto-suave); }
+.plazo.sin-fecha { background: var(--fondo); color: var(--texto-suave); border: 1px solid var(--borde); }
+
+.etiquetas { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.etiquetas li {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  color: var(--texto-suave);
+}
+
+.enlaces { margin: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.enlaces a { color: var(--acento); font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.enlaces a:hover, .enlaces a:focus { text-decoration: underline; }
+
+.pie {
+  border-top: 1px solid var(--borde);
+  padding: 20px 0 32px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+.pie a { color: inherit; }
+.pie p { margin: 4px 0; }
+
+.vacio {
+  background: var(--superficie);
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio);
+  padding: 24px;
+  text-align: center;
+  color: var(--texto-suave);
+}

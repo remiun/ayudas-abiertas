@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+Thumbs.db
+# Volcados de exploración de la API, pueden pesar mucho
+data/raw/
