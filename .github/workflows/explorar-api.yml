@@ -1,0 +1,28 @@
+name: Explorar API de la BDNS
+
+# Lanzamiento manual. Vuelca los catálogos y muestras de la API como artefacto
+# para verificar nombres de campos y parámetros sin tocar los datos publicados.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  explorar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Volcar catálogos y muestras
+        run: python scripts/actualizar_bdns.py --explorar
+      - name: Guardar volcado como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdns-raw
+          path: data/raw/
+          if-no-files-found: warn
+          retention-days: 7
