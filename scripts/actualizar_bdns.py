@@ -76,6 +76,17 @@ COMUNIDADES = {
 }
 TODA_ESPANA = "Toda España"
 
+# Códigos NUTS 1 que la API usa a veces en lugar de la comunidad. Se expanden a sus comunidades.
+NUTS1 = {
+    "ES1": ["Galicia", "Principado de Asturias", "Cantabria"],
+    "ES2": ["País Vasco", "Comunidad Foral de Navarra", "La Rioja", "Aragón"],
+    "ES3": ["Comunidad de Madrid"],
+    "ES4": ["Castilla y León", "Castilla-La Mancha", "Extremadura"],
+    "ES5": ["Cataluña", "Comunitat Valenciana", "Illes Balears"],
+    "ES6": ["Andalucía", "Región de Murcia", "Ciudad de Ceuta", "Ciudad de Melilla"],
+    "ES7": ["Canarias"],
+}
+
 AMBITOS = {"ESTATAL": "Estatal", "ESTADO": "Estatal", "AUTONOMICA": "Autonómica", "LOCAL": "Local", "OTROS": "Otros organismos"}
 
 # Palabras que se mantienen en minúscula al capitalizar nombres de órganos.
@@ -251,10 +262,15 @@ def comunidades_de(regiones: list[str]) -> list[str]:
     resultado: list[str] = []
     for texto in regiones:
         codigo, _ = separar_region(texto)
-        nombre = COMUNIDADES.get(codigo[:4]) if len(codigo) >= 4 else TODA_ESPANA
-        nombre = nombre or TODA_ESPANA
-        if nombre not in resultado:
-            resultado.append(nombre)
+        if len(codigo) >= 4 and codigo[:4] in COMUNIDADES:
+            nombres = [COMUNIDADES[codigo[:4]]]
+        elif len(codigo) == 3 and codigo in NUTS1:
+            nombres = NUTS1[codigo]
+        else:
+            nombres = [TODA_ESPANA]
+        for nombre in nombres:
+            if nombre not in resultado:
+                resultado.append(nombre)
     return resultado or [TODA_ESPANA]
 
 
