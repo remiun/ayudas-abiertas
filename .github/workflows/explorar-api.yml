@@ -18,6 +18,9 @@ jobs:
           python-version: "3.12"
       - name: Volcar catálogos y muestras
         run: python scripts/actualizar_bdns.py --explorar
+      - name: Probar parámetros de búsqueda y aviso legal
+        if: always()
+        run: python scripts/explorar_parametros.py
       - name: Mostrar volcado en el registro
         if: always()
         run: |
