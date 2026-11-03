@@ -15,6 +15,28 @@
   const contenedor = $("#resultados");
   const plantilla = $("#plantilla-ayuda");
   const selRegion = $("#region");
+  const selProvincia = $("#provincia");
+
+  // Comunidad de cada provincia, para que el selector de provincia siga al de comunidad
+  // y para que una ayuda autonómica cuente también al filtrar por una provincia de esa comunidad.
+  const PROVINCIAS = {
+    "A Coruña": "Galicia", "Lugo": "Galicia", "Ourense": "Galicia", "Pontevedra": "Galicia",
+    "Asturias": "Principado de Asturias", "Cantabria": "Cantabria",
+    "Araba/Álava": "País Vasco", "Gipuzkoa": "País Vasco", "Bizkaia": "País Vasco",
+    "Navarra": "Comunidad Foral de Navarra", "La Rioja": "La Rioja",
+    "Huesca": "Aragón", "Teruel": "Aragón", "Zaragoza": "Aragón",
+    "Madrid": "Comunidad de Madrid",
+    "Ávila": "Castilla y León", "Burgos": "Castilla y León", "León": "Castilla y León", "Palencia": "Castilla y León",
+    "Salamanca": "Castilla y León", "Segovia": "Castilla y León", "Soria": "Castilla y León", "Valladolid": "Castilla y León", "Zamora": "Castilla y León",
+    "Albacete": "Castilla-La Mancha", "Ciudad Real": "Castilla-La Mancha", "Cuenca": "Castilla-La Mancha", "Guadalajara": "Castilla-La Mancha", "Toledo": "Castilla-La Mancha",
+    "Badajoz": "Extremadura", "Cáceres": "Extremadura",
+    "Barcelona": "Cataluña", "Girona": "Cataluña", "Lleida": "Cataluña", "Tarragona": "Cataluña",
+    "Alicante/Alacant": "Comunitat Valenciana", "Castellón/Castelló": "Comunitat Valenciana", "Valencia/València": "Comunitat Valenciana",
+    "Illes Balears": "Illes Balears",
+    "Almería": "Andalucía", "Cádiz": "Andalucía", "Córdoba": "Andalucía", "Granada": "Andalucía", "Huelva": "Andalucía", "Jaén": "Andalucía", "Málaga": "Andalucía", "Sevilla": "Andalucía",
+    "Murcia": "Región de Murcia", "Ceuta": "Ciudad de Ceuta", "Melilla": "Ciudad de Melilla",
+    "Las Palmas": "Canarias", "Santa Cruz de Tenerife": "Canarias"
+  };
   const selAmbito = $("#ambito");
   const selFinalidad = $("#finalidad");
 
@@ -75,6 +97,19 @@
     }
   }
 
+  function rellenarProvincias() {
+    const comunidad = selRegion.value;
+    const actual = selProvincia.value;
+    selProvincia.textContent = "";
+    const todas = document.createElement("option");
+    todas.value = "";
+    todas.textContent = "Todas";
+    selProvincia.appendChild(todas);
+    const lista = Object.keys(PROVINCIAS).filter((p) => !comunidad || PROVINCIAS[p] === comunidad);
+    rellenarSelect(selProvincia, lista);
+    if (lista.includes(actual)) selProvincia.value = actual;
+  }
+
   function prepararFiltros() {
     const regiones = new Set();
     const ambitos = new Set();
@@ -85,6 +120,7 @@
       if (a.finalidad) finalidades.add(a.finalidad);
     }
     rellenarSelect(selRegion, regiones);
+    rellenarProvincias();
     rellenarSelect(selAmbito, ambitos);
     rellenarSelect(selFinalidad, finalidades);
   }
@@ -93,6 +129,7 @@
     const datos = new FormData(form);
     const texto = normalizar(datos.get("texto"));
     const region = datos.get("region");
+    const provincia = datos.get("provincia");
     const ambito = datos.get("ambito");
     const finalidad = datos.get("finalidad");
     const soloAbiertas = datos.get("abiertas") === "on";
@@ -100,10 +137,16 @@
     return ayudas.filter((a) => {
       if (soloAbiertas && !estaAbierta(a)) return false;
       if (region && !(a.comunidades || []).includes(region) && !(a.comunidades || []).includes("Toda España")) return false;
+      if (provincia) {
+        const provs = a.provincias || [];
+        const coms = a.comunidades || [];
+        const cubrePorAmbito = provs.length === 0 && (coms.includes(PROVINCIAS[provincia]) || coms.includes("Toda España"));
+        if (!provs.includes(provincia) && !cubrePorAmbito) return false;
+      }
       if (ambito && a.ambito !== ambito) return false;
       if (finalidad && a.finalidad !== finalidad) return false;
       if (texto) {
-        const pajar = normalizar([a.titulo, a.organo, a.finalidad, (a.regiones || []).join(" "), (a.comunidades || []).join(" ")].join(" "));
+        const pajar = normalizar([a.titulo, a.organo, a.finalidad, (a.regiones || []).join(" "), (a.provincias || []).join(" "), (a.comunidades || []).join(" ")].join(" "));
         if (!texto.split(/\s+/).every((palabra) => pajar.includes(palabra))) return false;
       }
       return true;
@@ -159,7 +202,8 @@
       nodo.querySelector(".publicada").textContent = a.fechaPublicacion ? "Publicada en la BDNS el " + formatearFecha(a.fechaPublicacion) : "";
 
       const ul = nodo.querySelector(".etiquetas");
-      const etiquetas = [].concat(a.comunidades || [], a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
+      const lugar = (a.provincias && a.provincias.length) ? a.provincias : (a.comunidades || []);
+      const etiquetas = [].concat(lugar, a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
       for (const e of etiquetas.slice(0, 5)) {
         const li = document.createElement("li");
         li.textContent = e;
@@ -208,6 +252,7 @@
     } catch (err) { /* el pie queda sin fecha */ }
   }
 
+  selRegion.addEventListener("change", rellenarProvincias);
   form.addEventListener("input", actualizar);
   form.addEventListener("submit", (e) => { e.preventDefault(); actualizar(); });
   cargar();

@@ -5,15 +5,15 @@ Dedicación prevista: 1-2 horas al día. Cada paso deja la web publicable. Fecha
 ## Hecho
 
 - 2026-11-02. Repositorio, web estática con filtros, script de descarga con la biblioteca estándar, acción nocturna, primera carga real (1.863 ayudas vigentes para personas, 60 días).
+- 2026-11-03. Filtro por provincia: el script deriva la provincia del código NUTS 3, el selector depende de la comunidad y las ayudas autonómicas o estatales cuentan también al filtrar por una provincia suya.
 - 2026-11-03. Aviso legal de la BDNS volcado íntegro y convertido en principio número uno (`docs/aviso-legal.md`): cita literal de origen, fecha en cada tarjeta, aviso de independencia, campo `advertencia` conservado, enlace correcto a la ficha oficial. GitHub Pages activado.
 
 ## Fase 1. Que sea útil de verdad (noviembre de 2026)
 
 1. **Comprobar la actualización nocturna** durante una semana: que corre, que no falla y cuántas nuevas trae al día.
-2. **Filtro por provincia.** El grueso de las ayudas es local; la comunidad se queda corta. Los datos ya traen el código NUTS 3.
-3. **Plazo estimado a partir del texto.** Más de la mitad de las convocatorias solo dicen "15 días hábiles desde la publicación en el BOP". Calcular una fecha estimada, marcarla claramente como estimación propia y nunca sustituir el texto oficial.
-4. **Portada con sentido:** las que cierran esta semana, las nuevas de hoy, y accesos por tema (vivienda, estudios, familia, mayores, empleo, dependencia).
-5. **Página "Cómo funciona"** en lenguaje claro: de dónde salen los datos, qué no es esta web, cómo comprobar una ayuda en la fuente oficial.
+2. **Plazo estimado a partir del texto.** Más de la mitad de las convocatorias solo dicen "15 días hábiles desde la publicación en el BOP". Calcular una fecha estimada, marcarla claramente como estimación propia y nunca sustituir el texto oficial.
+3. **Portada con sentido:** las que cierran esta semana, las nuevas de hoy, y accesos por tema (vivienda, estudios, familia, mayores, empleo, dependencia).
+4. **Página "Cómo funciona"** en lenguaje claro: de dónde salen los datos, qué no es esta web, cómo comprobar una ayuda en la fuente oficial.
 
 ## Fase 2. Llegar a más gente (diciembre de 2026)
 

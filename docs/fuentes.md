@@ -36,6 +36,8 @@ Resultado de sondear la API desde GitHub Actions con `scripts/explorar_parametro
 | `tipoAdministracion` | `C`, `A`, `L` | Estatal, autonómica, local. |
 | `order`, `direccion` | `fechaRecepcion`, `desc` | `fechaFinSolicitud` no se admite como orden. |
 
+Las provincias se derivan del código NUTS 3 de `regiones[].descripcion` (tabla `PROVINCIAS` del script). En Canarias y Baleares la API usa islas, que se agrupan en su provincia. Una convocatoria con región NUTS 2 o superior no lleva provincia y se considera que cubre todas las de su comunidad.
+
 Campos de cada elemento: `id`, `numeroConvocatoria`, `descripcion`, `descripcionLeng`, `fechaRecepcion` (ISO), `nivel1` (`ESTATAL`, `AUTONOMICA`, `LOCAL`), `nivel2`, `nivel3`, `mrr`.
 
 No existe parámetro para pedir solo convocatorias abiertas; el filtrado por plazo se hace en el cliente.

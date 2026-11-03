@@ -76,6 +76,29 @@ COMUNIDADES = {
 }
 TODA_ESPANA = "Toda España"
 
+# Provincias por código NUTS 3. En Canarias y Baleares la API usa islas; se agrupan en su provincia.
+PROVINCIAS = {
+    "ES111": "A Coruña", "ES112": "Lugo", "ES113": "Ourense", "ES114": "Pontevedra",
+    "ES120": "Asturias", "ES130": "Cantabria",
+    "ES211": "Araba/Álava", "ES212": "Gipuzkoa", "ES213": "Bizkaia",
+    "ES220": "Navarra", "ES230": "La Rioja",
+    "ES241": "Huesca", "ES242": "Teruel", "ES243": "Zaragoza",
+    "ES300": "Madrid",
+    "ES411": "Ávila", "ES412": "Burgos", "ES413": "León", "ES414": "Palencia", "ES415": "Salamanca",
+    "ES416": "Segovia", "ES417": "Soria", "ES418": "Valladolid", "ES419": "Zamora",
+    "ES421": "Albacete", "ES422": "Ciudad Real", "ES423": "Cuenca", "ES424": "Guadalajara", "ES425": "Toledo",
+    "ES431": "Badajoz", "ES432": "Cáceres",
+    "ES511": "Barcelona", "ES512": "Girona", "ES513": "Lleida", "ES514": "Tarragona",
+    "ES521": "Alicante/Alacant", "ES522": "Castellón/Castelló", "ES523": "Valencia/València",
+    "ES531": "Illes Balears", "ES532": "Illes Balears", "ES533": "Illes Balears",
+    "ES611": "Almería", "ES612": "Cádiz", "ES613": "Córdoba", "ES614": "Granada", "ES615": "Huelva",
+    "ES616": "Jaén", "ES617": "Málaga", "ES618": "Sevilla",
+    "ES620": "Murcia", "ES630": "Ceuta", "ES640": "Melilla",
+    "ES703": "Santa Cruz de Tenerife", "ES704": "Las Palmas", "ES705": "Las Palmas", "ES706": "Santa Cruz de Tenerife",
+    "ES707": "Santa Cruz de Tenerife", "ES708": "Las Palmas", "ES709": "Santa Cruz de Tenerife",
+    "ES701": "Las Palmas", "ES702": "Santa Cruz de Tenerife",
+}
+
 # Códigos NUTS 1 que la API usa a veces en lugar de la comunidad. Se expanden a sus comunidades.
 NUTS1 = {
     "ES1": ["Galicia", "Principado de Asturias", "Cantabria"],
@@ -110,7 +133,7 @@ def capitalizar(texto: str) -> str:
             # Catalán: D'IGUALTAT -> d'Igualtat
             palabras.append(palabra[0].lower() + "'" + palabra[2:3].upper() + palabra[3:].lower())
         else:
-            palabras.append("-".join(parte[:1].upper() + parte[1:].lower() for parte in palabra.split("-")))
+            palabras.append("/".join("-".join(parte[:1].upper() + parte[1:].lower() for parte in trozo.split("-")) for trozo in palabra.split("/")))
     return " ".join(palabras)
 
 
@@ -274,6 +297,17 @@ def comunidades_de(regiones: list[str]) -> list[str]:
     return resultado or [TODA_ESPANA]
 
 
+def provincias_de(regiones: list[str]) -> list[str]:
+    """Provincias a partir de los códigos NUTS 3. Vacío si la convocatoria es autonómica, estatal o sin código."""
+    resultado: list[str] = []
+    for texto in regiones:
+        codigo, _ = separar_region(texto)
+        nombre = PROVINCIAS.get(codigo)
+        if nombre and nombre not in resultado:
+            resultado.append(nombre)
+    return resultado
+
+
 def url_valida(valor: str | None) -> str | None:
     """La API mezcla URL con texto libre; se conserva solo lo que parece una dirección web."""
     if not valor:
@@ -306,6 +340,7 @@ def normalizar(detalle: dict) -> dict:
         "organo": organo_texto(detalle),
         "ambito": AMBITOS.get((organo.get("nivel1") or "").upper(), organo.get("nivel1") or ""),
         "comunidades": comunidades_de(regiones),
+        "provincias": provincias_de(regiones),
         "regiones": [capitalizar(separar_region(r)[1] or r) for r in regiones],
         "finalidad": (detalle.get("descripcionFinalidad") or "").strip() or None,
         "tipoConvocatoria": detalle.get("tipoConvocatoria"),
