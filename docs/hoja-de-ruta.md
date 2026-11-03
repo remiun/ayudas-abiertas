@@ -5,6 +5,7 @@ Dedicación prevista: 1-2 horas al día. Cada paso deja la web publicable. Fecha
 ## Hecho
 
 - 2026-11-02. Repositorio, web estática con filtros, script de descarga con la biblioteca estándar, acción nocturna, primera carga real (1.863 ayudas vigentes para personas, 60 días).
+- 2026-11-03. Filtro "Para quién": 22 perfiles de destinatario deducidos del título, en castellano y lenguas cooficiales, anunciados como orientativos (`docs/perfiles.md`).
 - 2026-11-03. Filtro por provincia: el script deriva la provincia del código NUTS 3, el selector depende de la comunidad y las ayudas autonómicas o estatales cuentan también al filtrar por una provincia suya.
 - 2026-11-03. Aviso legal de la BDNS volcado íntegro y convertido en principio número uno (`docs/aviso-legal.md`): cita literal de origen, fecha en cada tarjeta, aviso de independencia, campo `advertencia` conservado, enlace correcto a la ficha oficial. GitHub Pages activado.
 

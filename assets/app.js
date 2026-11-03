@@ -16,6 +16,13 @@
   const plantilla = $("#plantilla-ayuda");
   const selRegion = $("#region");
   const selProvincia = $("#provincia");
+  const selPerfil = $("#perfil");
+
+  // Orden fijo de los perfiles, el mismo que en el script de descarga.
+  const PERFILES = ["Estudiantes", "Jóvenes", "Familias e infancia", "Personas mayores", "Mujeres", "Discapacidad y dependencia",
+    "Desempleo y empleo", "Vivienda", "Pocos ingresos y emergencia social", "Salud", "Deportistas", "Cultura y creación", "Investigación",
+    "Transporte y movilidad", "Energía y hogar", "Campo, mar y medio rural", "Autónomos y emprendedores", "Migración y retorno",
+    "Víctimas y catástrofes", "Nacimiento, bodas y defunciones", "Asociaciones y voluntariado", "Concursos y premios", "Otros"];
 
   // Comunidad de cada provincia, para que el selector de provincia siga al de comunidad
   // y para que una ayuda autonómica cuente también al filtrar por una provincia de esa comunidad.
@@ -119,6 +126,13 @@
       if (a.ambito) ambitos.add(a.ambito);
       if (a.finalidad) finalidades.add(a.finalidad);
     }
+    const presentes = new Set(ayudas.flatMap((a) => a.perfiles || []));
+    for (const nombre of PERFILES.filter((n) => presentes.has(n))) {
+      const opt = document.createElement("option");
+      opt.value = nombre;
+      opt.textContent = nombre;
+      selPerfil.appendChild(opt);
+    }
     rellenarSelect(selRegion, regiones);
     rellenarProvincias();
     rellenarSelect(selAmbito, ambitos);
@@ -128,6 +142,7 @@
   function filtrar() {
     const datos = new FormData(form);
     const texto = normalizar(datos.get("texto"));
+    const perfil = datos.get("perfil");
     const region = datos.get("region");
     const provincia = datos.get("provincia");
     const ambito = datos.get("ambito");
@@ -136,6 +151,7 @@
 
     return ayudas.filter((a) => {
       if (soloAbiertas && !estaAbierta(a)) return false;
+      if (perfil && !(a.perfiles || []).includes(perfil)) return false;
       if (region && !(a.comunidades || []).includes(region) && !(a.comunidades || []).includes("Toda España")) return false;
       if (provincia) {
         const provs = a.provincias || [];
@@ -203,8 +219,9 @@
 
       const ul = nodo.querySelector(".etiquetas");
       const lugar = (a.provincias && a.provincias.length) ? a.provincias : (a.comunidades || []);
-      const etiquetas = [].concat(lugar, a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
-      for (const e of etiquetas.slice(0, 5)) {
+      const perfiles = (a.perfiles || []).filter((p) => p !== "Otros").slice(0, 2);
+      const etiquetas = [].concat(perfiles, lugar, a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
+      for (const e of etiquetas.slice(0, 6)) {
         const li = document.createElement("li");
         li.textContent = e;
         ul.appendChild(li);

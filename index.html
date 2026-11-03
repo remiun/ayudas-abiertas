@@ -25,6 +25,12 @@
         <input type="search" id="texto" name="texto" placeholder="Alquiler, beca, autónomos, dependencia..." autocomplete="off">
       </div>
       <div class="campo">
+        <label for="perfil">Para quién</label>
+        <select id="perfil" name="perfil">
+          <option value="">Cualquier persona</option>
+        </select>
+      </div>
+      <div class="campo">
         <label for="region">Comunidad</label>
         <select id="region" name="region">
           <option value="">Todas</option>
@@ -51,6 +57,7 @@
       <div class="campo campo-check">
         <label><input type="checkbox" id="abiertas" name="abiertas" checked> Solo con plazo abierto</label>
       </div>
+      <p class="nota">"Para quién" es una clasificación orientativa hecha a partir del título de cada convocatoria. Los requisitos de edad, renta o patrimonio están en la ficha oficial.</p>
     </form>
 
     <p class="estado" id="estado" role="status" aria-live="polite">Cargando ayudas...</p>

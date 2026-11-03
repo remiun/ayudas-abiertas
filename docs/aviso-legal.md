@@ -14,7 +14,7 @@ La reutilización de los documentos del SNPSAP está autorizada para fines comer
 
 | Condición del aviso legal | Medida en Ayudas Abiertas | Dónde |
 | --- | --- | --- |
-| Prohibido desnaturalizar el sentido de la información. | Se muestran los campos oficiales sin alterar su contenido. Solo se cambia la capitalización de títulos y órganos escritos en mayúsculas. Cualquier resumen o explicación propia futura irá marcado como tal, separado del texto oficial y con enlace a la ficha. | `scripts/actualizar_bdns.py`, `assets/app.js` |
+| Prohibido desnaturalizar el sentido de la información. | Se muestran los campos oficiales sin alterar su contenido. Solo se cambia la capitalización de títulos y órganos escritos en mayúsculas. Los campos propios (`comunidades`, `provincias`, `perfiles`) se guardan aparte y la web anuncia que "Para quién" es orientativo (`docs/perfiles.md`). Cualquier resumen o explicación propia futura irá marcado como tal, separado del texto oficial y con enlace a la ficha. | `scripts/actualizar_bdns.py`, `assets/app.js` |
 | Citar la fuente con la fórmula "Origen de los datos: Intervención General de la Administración del Estado". | Esa frase literal aparece en el pie de la web y en el README. | `index.html`, `README.md` |
 | Mencionar la fecha de la última actualización de los documentos. | Cada tarjeta muestra la fecha de publicación en la BDNS. El pie muestra la fecha de la última extracción. | `assets/app.js`, `data/meta.json` |
 | En caso de disociación de datos personales, citarlo. | No aplica: no se tratan datos personales. Solo se usan convocatorias, nunca concesiones ni beneficiarios. | `docs/aviso-legal.md` |

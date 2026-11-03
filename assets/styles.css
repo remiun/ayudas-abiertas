@@ -99,6 +99,8 @@ body {
 .campo-check label { color: var(--texto); display: flex; align-items: center; gap: 8px; min-height: 44px; }
 .campo-check input { width: 20px; height: 20px; }
 
+.nota { grid-column: 1 / -1; margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
+
 .estado { color: var(--texto-suave); margin: 8px 0 16px; }
 
 .resultados { display: grid; gap: 12px; margin-bottom: 32px; }

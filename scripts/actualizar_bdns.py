@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
+import unicodedata
 import time
 import urllib.error
 import urllib.parse
@@ -109,6 +111,37 @@ NUTS1 = {
     "ES6": ["Andalucía", "Región de Murcia", "Ciudad de Ceuta", "Ciudad de Melilla"],
     "ES7": ["Canarias"],
 }
+
+# Perfiles de destinatario deducidos del título de la convocatoria. Es una clasificación propia y
+# orientativa: la BDNS no publica edad, sexo, renta ni patrimonio; esos requisitos están en las bases.
+# El orden importa: es el orden en que se muestran en la web. Las expresiones se aplican sobre el
+# título en minúsculas y sin tildes.
+PERFILES: list[tuple[str, str]] = [
+    ("Estudiantes", r"\bbeca|\bbeques?\b|\bbolsas? de estudo|\bestudis\b|\bestudiants?\b|\bestudos\b|\bikasle|\bbeka\b|\bgrado\b|\bgrau\b|\btfg\b|\btfm\b|final de (grado|master|grau)|\bestudi(o|os|ante|antes)\b|\balumn|universitari|\bmaster\b|\berasmus\b|material escolar|libros? de texto|comedor escolar|transporte escolar|\bescolar(es|izacion)?\b|\bbachiller|formacion profesional|\bfp\b|\bcurso (escolar|academico)|\bmatricula"),
+    ("Jóvenes", r"\bjoven(es)?\b|\bjoves?\b|\bjoventut\b|\bmocidade\b|\bxuventude\b|\bxoves?\b|\bgazte|\bjuventud\b|\bjuvenil(es)?\b|carne joven|menores de (30|35)|\bemancipacion"),
+    ("Familias e infancia", r"\bfamili|\binfants?\b|\binfancia\b|\bnenos?\b|\bnenas?\b|\bllar d.infants|\bescola bressol|\bhaur|\bnatalidad|\bnacimiento|\badopcion|\bhij[oa]s?\b|\binfancia|\binfantil|\bmenores\b|\bguarderia|escuela infantil|\bconciliacion|monoparental|\bnumerosa|\bcrianza|\bbebe|\bpanales|\bcanastilla|\bcheque bebe|\bmaternidad|\bpaternidad|\bcampamento|\bludoteca"),
+    ("Personas mayores", r"\bmayores\b|\bgent gran\b|\bmaiores\b|\badineko|\bancian|tercera edad|\bjubilad|\bpensionista|\benvejecimiento|\bgeriatric|\bteleasistencia|\bcentro de dia"),
+    ("Mujeres", r"\bmujer(es)?\b|\bdon(a|es)\b|\bmuller(es)?\b|\bemakume|violencia de xenero|violencia masclista|violencia de genero|violencia machista|\bigualdad\b|\bfeminis|\bmadres?\b|victimas? de violencia"),
+    ("Discapacidad y dependencia", r"\bdiscapacidad|\bdiscapacitat|\bdiscapacidade|\bdesgaitasun|\bdependencia\b|\bdependents?\b|\bdependencia\b|\bdependientes?\b|movilidad reducida|diversidad funcional|\baccesibilidad|\bautonomia personal|\bcuidador|\bbarreras arquitectonicas|\bprotesis|\baudifono|\bsilla de ruedas"),
+    ("Desempleo y empleo", r"\bdesemple|\batur\b|\baturats?\b|\bocupacio\b|\bdesemprego|\bemprego\b|\benplegu|\btreball\b|\btraballo\b|\blangabe|\bparad[oa]s?\b|\bparo\b|insercion (socio)?laboral|\bcontratacion\b|\bempleo\b|\bempleabilidad|\bocupacion\b|formacion para el empleo|\bpracticas (profesionales|no laborales|becadas)|\bbecas? de formacion"),
+    ("Vivienda", r"\bvivienda|\bhabitatge|\blloguer|\bvivenda|\baluguer|\betxebizitza|\balokairu|\balquiler|\barrendamiento|\bhipotec|\brehabilitacion|\bibi\b|\bemancipacion|\bdesahucio|\brealojo|\bhogar\b|\binquilin"),
+    ("Pocos ingresos y emergencia social", r"emergencia social|\bvulnerab|\bexclusion|renta (minima|garantizada|de insercion|basica)|ingreso minimo|garantia de ingresos|pobreza energetica|\bsuministros?\b|\balimentos?\b|\balimentaria|necesidades basicas|\bemergencia\b|\bprecariedad|\bbono social|\bayudas? economicas?\b|servicios sociales|\bsituacion de necesidad|\bvales?\b"),
+    ("Salud", r"\bsalud\b|\bsanitari|\btratamiento|\benfermedad|\bmedicament|\bfarmac|\bgafas|\bortodoncia|\bodontolog|\bceliac|\boncolog|\bterapia|\bpsicolog|\brehabilitacion fisica"),
+    ("Deportistas", r"\bdeportista|\besport|\bkirol|\bdeporte|\bdeportiv|\batleta|\bolimpic|\bfederad"),
+    ("Cultura y creación", r"\bartist|\bkultur|\bcreador|\bcreacion (artistica|literaria|cultural)|\bcultura(l|les)?\b|\bmusica|\bmusic[oa]s?\b|\bteatro|\bdanza|\bcine\b|\baudiovisual|\bliterari|\bescritor|\bpintura|\bfotograf|\bresidencia artistica|\bpremio"),
+    ("Investigación", r"\binvestiga|predoctoral|posdoctoral|postdoctoral|\btesis\b|\bdoctorado|\bcientific"),
+    ("Transporte y movilidad", r"\btransporte\b|\bbono (bus|transporte|taxi)|\btaxi|\bvehicul|\bcarne de conducir|\bpermiso de conduc|\blicencias? de conduc|\bbicicleta|\bpatinete|\bmovilidad (sostenible|electrica)"),
+    ("Energía y hogar", r"\benergetic|\bautoconsumo|\bplacas solares|\bfotovoltaic|\bcaldera|\baerotermia|\baislamiento|\befic(i)?encia energetica|\belectrodomestic|\bfactura (electrica|de la luz|del gas)"),
+    ("Campo, mar y medio rural", r"\bagricult|\bagrari|\bganader|\bpesca|\bpescador|\bmarisc|\bapicult|\brural|\bforestal|\bcaza\b|\bcazador|\bexplotacion"),
+    ("Autónomos y emprendedores", r"\bautonom[oa]s?\b|\bemprend|\bnegocio|\bactividad economica|\bpyme|\bcomercio\b|\bcomerciante|\bhosteler|\bprofesional(es)? liberal"),
+    ("Migración y retorno", r"\binmigra|\bmigrante|\brefugiad|\basilo\b|\bretorn|\bemigrante|\bextranjer|\bacogida"),
+    ("Víctimas y catástrofes", r"\bvictimas?\b|\bterrorismo|\bcatastrof|\bdana\b|\binundaci|\bincendio|\btemporal\b|\bvolcan|\bsiniestro|\bdamnificad"),
+    ("Nacimiento, bodas y defunciones", r"\bsepelio|\bentierro|\bdefuncion|\bfunerari|\bmatrimonio|\bboda"),
+    ("Asociaciones y voluntariado", r"\bvoluntari|\bparticipacion ciudadana|\bvecinal"),
+    ("Concursos y premios", r"\bconcurso|\bconcurs\b|\bcertamen|\bcertame\b|\bpremios?\b|\bpremis?\b|\blehiaketa|\bsaria?\b|\bhimno\b"),
+]
+PERFILES_COMPILADOS = [(nombre, re.compile(patron)) for nombre, patron in PERFILES]
+SIN_PERFIL = "Otros"
 
 AMBITOS = {"ESTATAL": "Estatal", "ESTADO": "Estatal", "AUTONOMICA": "Autonómica", "LOCAL": "Local", "OTROS": "Otros organismos"}
 
@@ -297,6 +330,17 @@ def comunidades_de(regiones: list[str]) -> list[str]:
     return resultado or [TODA_ESPANA]
 
 
+def sin_tildes(texto: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", texto.lower()) if unicodedata.category(c) != "Mn")
+
+
+def perfiles_de(titulo: str) -> list[str]:
+    """Perfiles de destinatario que sugiere el título. Clasificación propia y orientativa."""
+    texto = sin_tildes(titulo or "")
+    encontrados = [nombre for nombre, patron in PERFILES_COMPILADOS if patron.search(texto)]
+    return encontrados or [SIN_PERFIL]
+
+
 def provincias_de(regiones: list[str]) -> list[str]:
     """Provincias a partir de los códigos NUTS 3. Vacío si la convocatoria es autonómica, estatal o sin código."""
     resultado: list[str] = []
@@ -343,6 +387,7 @@ def normalizar(detalle: dict) -> dict:
         "provincias": provincias_de(regiones),
         "regiones": [capitalizar(separar_region(r)[1] or r) for r in regiones],
         "finalidad": (detalle.get("descripcionFinalidad") or "").strip() or None,
+        "perfiles": perfiles_de(detalle.get("descripcion") or ""),
         "tipoConvocatoria": detalle.get("tipoConvocatoria"),
         "presupuesto": detalle.get("presupuestoTotal"),
         "fechaPublicacion": fecha_iso(detalle.get("fechaRecepcion")),
