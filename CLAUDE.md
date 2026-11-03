@@ -2,6 +2,9 @@
 
 Buscador web gratuito de ayudas públicas abiertas en España para personas físicas, con datos abiertos de la BDNS.
 
+## Principio número uno
+- **No infringir en ningún caso el aviso legal de la BDNS.** Las condiciones y la medida que cumple cada una están en `docs/aviso-legal.md`; se lee antes de tocar datos, textos del pie o el script de descarga. En resumen: citar literalmente "Origen de los datos: Intervención General de la Administración del Estado", mostrar la fecha de actualización, no desnaturalizar la información, no sugerir apoyo de la IGAE, conservar el campo `advertencia` en `data/meta.json`, no tratar nunca concesiones ni datos de personas, y no abusar del API (una ejecución diaria, incremental, con pausa). Ante la duda, no se hace.
+
 ## Restricciones que mandan
 - Coste de operación cero: web estática en GitHub Pages, datos generados por una acción de GitHub. Sin servidor, sin base de datos, sin API de pago.
 - Sin cuentas, sin anuncios, sin cookies de rastreo ni analítica de terceros.

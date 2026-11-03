@@ -156,6 +156,7 @@
       enlaceTitulo.href = a.urlFicha;
 
       nodo.querySelector(".organo").textContent = a.organo || "";
+      nodo.querySelector(".publicada").textContent = a.fechaPublicacion ? "Publicada en la BDNS el " + formatearFecha(a.fechaPublicacion) : "";
 
       const ul = nodo.querySelector(".etiquetas");
       const etiquetas = [].concat(a.comunidades || [], a.finalidad ? [a.finalidad] : [], a.ambito ? [a.ambito] : []);
@@ -201,7 +202,7 @@
         const meta = await resp.json();
         if (meta.actualizado) {
           const f = meta.actualizado.slice(0, 10).split("-");
-          $("#actualizado").textContent = "Última actualización: " + f[2] + "/" + f[1] + "/" + f[0] + ".";
+          $("#actualizado").textContent = "Última extracción de datos: " + f[2] + "/" + f[1] + "/" + f[0] + ".";
         }
       }
     } catch (err) { /* el pie queda sin fecha */ }

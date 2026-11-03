@@ -316,8 +316,14 @@ def normalizar(detalle: dict) -> dict:
         "plazoTexto": " ".join((detalle.get("textFin") or "").split()) or None,
         "urlBases": url_valida(detalle.get("urlBasesReguladoras")),
         "urlSede": url_valida(detalle.get("sedeElectronica")),
-        "urlFicha": f"https://www.infosubvenciones.es/bdnstrans/{PORTAL}/es/convocatoria/{num}",
+        "urlFicha": f"https://www.infosubvenciones.es/bdnstrans/{PORTAL}/es/convocatorias/{num}",
     }
+
+
+def cargar_meta() -> dict:
+    if not RUTA_META.exists():
+        return {}
+    return json.loads(RUTA_META.read_text(encoding="utf-8"))
 
 
 def cargar_existentes() -> dict[str, dict]:
@@ -349,6 +355,7 @@ def actualizar(dias: int) -> None:
     resumen = buscar_convocatorias(desde, hoy)
 
     existentes = cargar_existentes()
+    advertencia = None  # condiciones de reutilización que la API adjunta a cada respuesta; se conservan literales
     nuevas = refrescadas = fallos = 0
     for item in resumen:
         num = str(item.get("numeroConvocatoria") or "")
@@ -365,6 +372,7 @@ def actualizar(dias: int) -> None:
             refrescadas += 1
         else:
             nuevas += 1
+        advertencia = advertencia or detalle.get("advertencia")
         existentes[num] = normalizar(detalle)
 
     vigentes = [c for c in existentes.values() if sigue_vigente(c, hoy)]
@@ -382,7 +390,10 @@ def actualizar(dias: int) -> None:
                 "refrescadas": refrescadas,
                 "fallos": fallos,
                 "ventanaDias": dias,
-                "fuente": "Base de Datos Nacional de Subvenciones",
+                "fuente": "Origen de los datos: Intervención General de la Administración del Estado",
+                "portal": "https://www.infosubvenciones.es/",
+                "condicionesReutilizacion": "https://www.infosubvenciones.es/bdnstrans/GE/es/avisolegal",
+                "advertencia": advertencia or cargar_meta().get("advertencia"),
             },
             ensure_ascii=False,
             indent=1,

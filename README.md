@@ -19,9 +19,13 @@ Buscador gratuito de ayudas públicas abiertas en España para personas: filtra 
 
 No hay servidor propio, ni base de datos, ni coste de operación.
 
-## Fuente de datos
+## Fuente de datos y aviso legal
 
-Los datos proceden del [Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas](https://www.infosubvenciones.es/), gestionado por la Intervención General de la Administración del Estado, de acceso público según el artículo 20 de la Ley 38/2003 General de Subvenciones. Los datos pueden cambiar después de extraerlos; la ficha oficial manda. Más detalle y condiciones de reutilización en [`docs/fuentes.md`](docs/fuentes.md).
+Origen de los datos: Intervención General de la Administración del Estado. Proceden del [Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas](https://www.infosubvenciones.es/), de acceso público según el artículo 20 de la Ley 38/2003 General de Subvenciones, y se reutilizan conforme a sus [condiciones de uso](https://www.infosubvenciones.es/bdnstrans/GE/es/avisolegal).
+
+**Cumplir ese aviso legal es la regla número uno del proyecto.** Qué exige y qué medida concreta lo cumple, condición por condición, en [`docs/aviso-legal.md`](docs/aviso-legal.md). Detalles técnicos de la API en [`docs/fuentes.md`](docs/fuentes.md).
+
+Ayudas Abiertas es un proyecto ciudadano independiente: no está vinculado a la Intervención General de la Administración del Estado ni a ninguna administración, y ninguna lo patrocina ni lo apoya. La información es orientativa y puede cambiar después de extraerla; la ficha oficial manda.
 
 ## Desarrollo
 
