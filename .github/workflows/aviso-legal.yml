@@ -1,0 +1,42 @@
+name: Volcar aviso legal de la BDNS
+
+# Lanzamiento manual. El aviso legal se sirve como aplicación web; se renderiza
+# con un navegador y se imprime su texto para revisarlo y guardarlo en docs/.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  volcar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar Playwright
+        run: |
+          pip install --quiet playwright
+          python -m playwright install --with-deps chromium
+      - name: Renderizar y volcar el texto
+        run: |
+          cat > /tmp/volcar.py <<'PY'
+          from playwright.sync_api import sync_playwright
+          urls = [
+              "https://www.infosubvenciones.es/bdnstrans/GE/es/avisolegal",
+              "https://www.infosubvenciones.es/bdnstrans/GE/es/inicio",
+          ]
+          with sync_playwright() as p:
+              b = p.chromium.launch()
+              pg = b.new_page()
+              for url in urls:
+                  pg.goto(url, wait_until="networkidle", timeout=90000)
+                  pg.wait_for_timeout(3000)
+                  print("=" * 20, url)
+                  print(pg.inner_text("body"))
+                  for enlace in pg.eval_on_selector_all("a", "els => els.map(e => e.href + ' | ' + e.innerText.trim()).filter(t => /legal|licen|reutiliz|datos abiertos|condicion/i.test(t))"):
+                      print("ENLACE:", enlace)
+              b.close()
+          PY
+          python /tmp/volcar.py
